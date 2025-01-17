@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import { hash, compare } from "bcrypt";
 import User from "../models/User.js";
 import { rmSync } from "fs";
+import { createToken } from "../utils/token-manager.js";
+import { COOKIE_NAME } from "../utils/constants.js";
 
 // get all users
 export const getAllUsers = async (
@@ -34,6 +36,15 @@ export const userSignUp = async (
     const hashedPassword = await hash(password, 10);
     const user = new User({ name, email, password: hashedPassword });
     user.save();
+
+    // Create token and store cookie
+    res.clearCookie(COOKIE_NAME, {
+      httpOnly: true,
+      domain: "localhost",
+      signed: true,
+      path: "/",
+    });
+
     return res
       .status(201)
       .json({ message: "User created Succesfully", id: user._id.toString() });
@@ -61,13 +72,29 @@ export const userLogin = async (
       return res.status(403).send("Incorrect Id or Password");
     }
 
-    return res
-      .status(201)
-      .json({
-        message: "Login Succesful",
-        id: user._id.toString(),
-        password: user.password,
-      });
+    res.clearCookie(COOKIE_NAME, {
+      httpOnly: true,
+      domain: "localhost",
+      signed: true,
+      path: "/",
+    });
+
+    const token = createToken(user._id.toString(), user.email, "7d");
+    const expires = new Date();
+    expires.setDate(expires.getDate() + 7);
+
+    res.cookie(COOKIE_NAME, token, {
+      path: "/",
+      domain: "localhost",
+      expires,
+      httpOnly: true,
+      signed: true,
+    });
+
+    return res.status(200).json({
+      message: "Login Succesful",
+      id: user._id.toString(),
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "ERROR", cause: error.message });

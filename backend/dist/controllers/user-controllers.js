@@ -1,5 +1,7 @@
 import { hash, compare } from "bcrypt";
 import User from "../models/User.js";
+import { createToken } from "../utils/token-manager.js";
+import { COOKIE_NAME } from "../utils/constants.js";
 // get all users
 export const getAllUsers = async (req, res, next) => {
     try {
@@ -22,6 +24,13 @@ export const userSignUp = async (req, res, next) => {
         const hashedPassword = await hash(password, 10);
         const user = new User({ name, email, password: hashedPassword });
         user.save();
+        // Create token and store cookie
+        res.clearCookie(COOKIE_NAME, {
+            httpOnly: true,
+            domain: "localhost",
+            signed: true,
+            path: "/",
+        });
         return res
             .status(201)
             .json({ message: "User created Succesfully", id: user._id.toString() });
@@ -43,12 +52,25 @@ export const userLogin = async (req, res, next) => {
         if (!isPasswordMatch) {
             return res.status(403).send("Incorrect Id or Password");
         }
-        return res
-            .status(201)
-            .json({
+        res.clearCookie(COOKIE_NAME, {
+            httpOnly: true,
+            domain: "localhost",
+            signed: true,
+            path: "/",
+        });
+        const token = createToken(user._id.toString(), user.email, "7d");
+        const expires = new Date();
+        expires.setDate(expires.getDate() + 7);
+        res.cookie(COOKIE_NAME, token, {
+            path: "/",
+            domain: "localhost",
+            expires,
+            httpOnly: true,
+            signed: true,
+        });
+        return res.status(200).json({
             message: "Login Succesful",
             id: user._id.toString(),
-            password: user.password,
         });
     }
     catch (error) {
