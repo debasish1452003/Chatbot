@@ -4,6 +4,7 @@ material-ui, context-API
 
 //Backend
 setup Node, Express App with TypeScript
+cors for proxy kind of thing  data exchange from backend and frontend
 
 morgan --> Morgan is a lightweight and powerful tool for logging HTTP requests in Node.js/Express.js. It helps developers monitor server activity, troubleshoot issues, and gain insights into request/response flows.
 

@@ -33,7 +33,7 @@ export const userSignUp = async (req, res, next) => {
         });
         return res
             .status(201)
-            .json({ message: "User created Succesfully", id: user._id.toString() });
+            .json({ message: "User created Succesfully", name: user.name, email: user.email });
     }
     catch (error) {
         console.log(error);
@@ -70,7 +70,7 @@ export const userLogin = async (req, res, next) => {
         });
         return res.status(200).json({
             message: "Login Succesful",
-            id: user._id.toString(),
+            name: user.name, email: user.email
         });
     }
     catch (error) {

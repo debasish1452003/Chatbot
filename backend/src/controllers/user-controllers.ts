@@ -47,7 +47,7 @@ export const userSignUp = async (
 
     return res
       .status(201)
-      .json({ message: "User created Succesfully", id: user._id.toString() });
+      .json({ message: "User created Succesfully",  name: user.name, email: user.email });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Error", cause: error.message });
@@ -93,7 +93,7 @@ export const userLogin = async (
 
     return res.status(200).json({
       message: "Login Succesful",
-      id: user._id.toString(),
+      name:user.name, email: user.email
     });
   } catch (error) {
     console.log(error);
